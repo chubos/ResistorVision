@@ -9,19 +9,22 @@ interface ResistanceResultProps {
 export default function ResistanceResult({ value, tolerance, tempCoeff }: ResistanceResultProps) {
   const formatResistance = () => {
     let unit = "Ω";
-    let displayValue = value;
 
-    if (value >= 1000000000) {
-      displayValue = value / 1000000000;
+    // Zaokrąglij wartość do 10 miejsc dziesiętnych aby uniknąć błędów zmiennoprzecinkowych
+    let displayValue = Math.round(value * 10000000000) / 10000000000;
+
+    if (displayValue >= 1000000000) {
+      displayValue = displayValue / 1000000000;
       unit = "GΩ";
-    } else if (value >= 1000000) {
-      displayValue = value / 1000000;
+    } else if (displayValue >= 1000000) {
+      displayValue = displayValue / 1000000;
       unit = "MΩ";
-    } else if (value >= 1000) {
-      displayValue = value / 1000;
+    } else if (displayValue >= 1000) {
+      displayValue = displayValue / 1000;
       unit = "kΩ";
     }
 
+    // Zaokrąglij po konwersji jednostki
     displayValue = Math.round(displayValue * 100) / 100;
 
     const formattedValue = displayValue % 1 === 0

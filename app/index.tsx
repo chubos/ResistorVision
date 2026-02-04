@@ -80,7 +80,6 @@ export default function Index() {
       resistance = (digit1 * 100 + digit2 * 10 + digit3) * multiplier;
     }
 
-    resistance = Math.round(resistance * 10000000000) / 10000000000;
 
     return { value: resistance, tolerance, tempCoeff };
   };
