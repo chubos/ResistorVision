@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ResistorVision",
+    "name": "Resistor Vision",
     "slug": "resistorvision",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,7 +21,7 @@
       "bundleIdentifier": "com.chubos.resistorvision",
       "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "ResistorVision needs camera access to recognize resistor band colors.",
+        "NSCameraUsageDescription": "Resistor Vision needs camera access to recognize resistor band colors.",
         "UIRequiresFullScreen": false,
         "UIStatusBarHidden": false
       }

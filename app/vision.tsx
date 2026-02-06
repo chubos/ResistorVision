@@ -1,4 +1,5 @@
 import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
 import { useFocusEffect } from "@react-navigation/native";
@@ -269,10 +270,14 @@ export default function Vision() {
     cameraContainer: {
       flex: 1,
       position: "relative",
-      backgroundColor: "#000",
+      overflow: "hidden",
     },
     camera: {
-      flex: 1,
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
     },
     overlay: {
       position: "absolute",
@@ -382,6 +387,7 @@ export default function Vision() {
   if (!hasPermission) {
     return (
       <View style={styles.permissionContainer}>
+        <StatusBar style="light" animated={true} />
         <Text style={styles.permissionText}>{t('vision.cameraPermission')}</Text>
         <Text style={styles.permissionText}>{t('vision.cameraPermissionMessage')}</Text>
         <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
@@ -394,14 +400,16 @@ export default function Vision() {
   if (!device) {
     return (
       <View style={styles.permissionContainer}>
+        <StatusBar style="light" animated={true} />
         <Text style={styles.permissionText}>{t('vision.cameraRestricted')}</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.cameraContainer}>
+    <View style={styles.container} collapsable={false}>
+      <StatusBar style="light" animated={true} />
+      <View style={[styles.cameraContainer, { backgroundColor: isActive ? "#000" : "transparent" }]} collapsable={false}>
         {isActive && device && (
           <Camera
             ref={cameraRef}
@@ -410,6 +418,7 @@ export default function Vision() {
             isActive={isActive}
             onError={handleCameraError}
             photo={true}
+            androidPreviewViewType="texture-view"
           />
         )}
 

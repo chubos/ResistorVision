@@ -1,28 +1,25 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 import "../i18n";
 
 function TabsLayout() {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { t } = useTranslation();
 
   return (
-    <>
-      <StatusBar style={isDark ? "light" : "dark"} />
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.textSecondary,
-          tabBarStyle: {
-            backgroundColor: colors.surface,
-            borderTopColor: colors.border,
-          },
-          headerShown: false,
-        }}
-      >
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+        },
+        headerShown: false,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -42,7 +39,6 @@ function TabsLayout() {
         }}
       />
     </Tabs>
-    </>
   );
 }
 
