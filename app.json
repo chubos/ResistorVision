@@ -21,14 +21,9 @@
       "bundleIdentifier": "com.chubos.resistorvision",
       "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "ResistorVision potrzebuje dostępu do kamery, aby rozpoznawać kolory pasków rezystorów.",
+        "NSCameraUsageDescription": "ResistorVision needs camera access to recognize resistor band colors.",
         "UIRequiresFullScreen": false,
         "UIStatusBarHidden": false
-      },
-      "locales": {
-        "pl": {
-          "NSCameraUsageDescription": "ResistorVision potrzebuje dostępu do kamery, aby rozpoznawać kolory pasków rezystorów."
-        }
       }
     },
     "android": {
@@ -43,9 +38,6 @@
       ],
       "package": "com.chubos.resistorvision",
       "versionCode": 1,
-      "screenOrientation": "portrait",
-      "resizeableActivity": true,
-      "supportsPictureInPicture": false,
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
@@ -71,7 +63,7 @@
       [
         "react-native-vision-camera",
         {
-          "cameraPermissionText": "ResistorVision potrzebuje dostępu do kamery, aby rozpoznawać kolory pasków rezystorów.",
+          "cameraPermissionText": "ResistorVision needs camera access to recognize resistor band colors.",
           "enableMicrophonePermission": false
         }
       ]
@@ -79,11 +71,6 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "autolinking": {
-      "exclude": [
-        "expo-camera"
-      ]
     },
     "extra": {
       "eas": {

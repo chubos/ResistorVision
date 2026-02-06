@@ -2,7 +2,7 @@
   "cli": {
     "version": ">= 13.2.0",
     "appVersionSource": "local",
-    "requireCommit": "true"
+    "requireCommit": true
   },
   "build": {
     "development": {

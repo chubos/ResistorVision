@@ -269,6 +269,7 @@ export default function Vision() {
     cameraContainer: {
       flex: 1,
       position: "relative",
+      backgroundColor: "#000",
     },
     camera: {
       flex: 1,
@@ -401,14 +402,16 @@ export default function Vision() {
   return (
     <View style={styles.container}>
       <View style={styles.cameraContainer}>
-        <Camera
-          ref={cameraRef}
-          style={styles.camera}
-          device={device}
-          isActive={isActive}
-          onError={handleCameraError}
-          photo={true}
-        />
+        {isActive && device && (
+          <Camera
+            ref={cameraRef}
+            style={styles.camera}
+            device={device}
+            isActive={isActive}
+            onError={handleCameraError}
+            photo={true}
+          />
+        )}
 
         <View style={styles.overlay}>
           <View style={styles.guideline} />

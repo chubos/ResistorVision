@@ -44,22 +44,16 @@ coverage/
 
 app-example
 
-*.xml
-
-# generated native folders
+# generated native folders - using Prebuild/CNG
 /ios
 /android
 
 # Production build secrets
 google-service-account.json
-android/gradle.properties
-android/app/release.keystore
-android/app/debug.keystore
-android/app/*.keystore
 
 # EAS
 .eas/
-
+.idea/
 # Build outputs
 *.apk
 *.aab
