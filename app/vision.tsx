@@ -1,12 +1,22 @@
 import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
 import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useKeepAwake } from 'expo-keep-awake';
+import { useTensorflowModel } from 'react-native-fast-tflite';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as jpeg from 'jpeg-js';
+import { useTranslation } from "react-i18next";
 import ResistanceResult from "@/components/ResistanceResult";
 import ResistorDisplay from "@/components/ResistorDisplay";
 import CameraInstructions from "@/components/CameraInstructions";
+import { processPhotoWithModel } from "@/utils/testModel";
+import { useTheme } from "@/contexts/ThemeContext";
+
+// Local types
+type ColorName = 'black' | 'brown' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'violet' | 'gray' | 'white' | 'gold' | 'silver';
 
 const RESISTOR_COLORS = {
   black: { value: 0, multiplier: 1, tolerance: null, tempCoeff: null, color: "#000000" },
@@ -23,21 +33,38 @@ const RESISTOR_COLORS = {
   silver: { value: null, multiplier: 0.01, tolerance: 10, tempCoeff: null, color: "#C0C0C0" },
 };
 
-type ColorName = keyof typeof RESISTOR_COLORS;
-
-
 export default function Vision() {
-  // Zapobiegaj blokowaniu ekranu podczas używania kamery
   useKeepAwake();
 
+  const router = useRouter();
+  const { colors } = useTheme();
+  const { t } = useTranslation();
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back');
+  const cameraRef = useRef<Camera>(null);
+
   const [isActive, setIsActive] = useState(true);
   const [detectedColors, setDetectedColors] = useState<ColorName[] | null>(null);
   const [bandCount, setBandCount] = useState<3 | 4 | 5 | 6>(4);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
 
+  // Model 1: Resistor detection
+  const detectionPlugin = useTensorflowModel(require('../assets/resistor32.tflite'));
+  const detectionModel = detectionPlugin?.state === 'loaded' ? detectionPlugin.model : null;
+
+  // Model 2: Color classification
+  const colorPlugin = useTensorflowModel(require('../assets/best_float32.tflite'));
+  const colorModel = colorPlugin?.state === 'loaded' ? colorPlugin.model : null;
+
+  useEffect(() => {
+    if (detectionPlugin.state === 'error') {
+      Alert.alert('Cannot load resistor detection model.');
+    }
+    if (colorPlugin.state === 'error') {
+      Alert.alert('Cannot load color classification model.');
+    }
+  }, [detectionPlugin.state, colorPlugin.state]);
 
   useEffect(() => {
     if (!hasPermission) {
@@ -53,7 +80,7 @@ export default function Vision() {
           setShowInstructions(false);
         }
       } catch (error) {
-        console.log('Error reading instructions state:', error);
+
       }
     };
     checkInstructionsShown();
@@ -72,17 +99,102 @@ export default function Vision() {
     if (error?.code === 'system/camera-is-restricted') {
       return;
     }
-
-    console.error('Camera error:', error);
+    Alert.alert(t('vision.cameraError'), error?.message || '');
   }, []);
 
-  const handleColorDetection = (colors: ColorName[] | null) => {
-    if (colors && colors.length > 0) {
-      setDetectedColors(colors);
-      setBandCount(colors.length as 3 | 4 | 5 | 6);
+  // ML detection
+  const handleManualCapture = useCallback(async () => {
+    if (!detectionModel || !colorModel) {
+      Alert.alert(t('common.loading'), t('vision.processing'));
+      return;
     }
-  };
 
+    if (!cameraRef.current) {
+      Alert.alert(t('vision.cameraPermission'), t('vision.cameraPermissionMessage'));
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      await AsyncStorage.setItem('visionInstructionsShown', 'true');
+      setShowInstructions(false);
+    } catch (error) {
+
+    }
+
+    try {
+      const photo = await cameraRef.current.takePhoto({
+        flash: 'off',
+      });
+
+      const photoUri = 'file://' + photo.path;
+
+      const cropSize = Math.round(photo.width * 0.35);
+      const cropX = Math.round((photo.width - cropSize) / 2);
+      const cropY = Math.round((photo.height - cropSize) / 2);
+
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        photoUri,
+        [
+          { crop: { originX: cropX, originY: cropY, width: cropSize, height: cropSize } },
+          { resize: { width: 640, height: 640 } }
+        ],
+        {
+          format: ImageManipulator.SaveFormat.JPEG,
+          base64: true,
+          compress: 0.9
+        }
+      );
+
+      if (!manipulatedImage.base64) {
+        throw new Error('Cannot process captured image');
+      }
+
+      const imageData = decodeJpegToFloat32(manipulatedImage.base64);
+      const result = await processPhotoWithModel(detectionModel, colorModel, imageData, t);
+
+      if (result.success && result.colors && result.colors.length >= 3) {
+        setDetectedColors(result.colors);
+        setBandCount(Math.min(Math.max(result.colors.length, 3), 6) as 3 | 4 | 5 | 6);
+      } else {
+        Alert.alert(t('vision.noResistorDetected'), result.message || t('vision.needMoreBands', { count: result.colors?.length || 0 }));
+      }
+    } catch (error: any) {
+      Alert.alert(t('vision.noResistorDetected'), t('vision.cameraPermissionMessage'));
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [detectionModel, colorModel, t]);
+
+  // Decode JPEG base64 to Float32Array RGB (640x640x3)
+  const decodeJpegToFloat32 = (base64: string): Float32Array => {
+    const binaryString = atob(base64);
+    const jpegData = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      jpegData[i] = binaryString.charCodeAt(i);
+    }
+
+    const rawImageData = jpeg.decode(jpegData, { useTArray: true });
+    const { width, height, data } = rawImageData;
+
+    const floatData = new Float32Array(640 * 640 * 3);
+
+    for (let y = 0; y < 640; y++) {
+      for (let x = 0; x < 640; x++) {
+        const srcX = Math.floor(x * width / 640);
+        const srcY = Math.floor(y * height / 640);
+        const srcIdx = (srcY * width + srcX) * 4;
+        const dstIdx = (y * 640 + x) * 3;
+
+        floatData[dstIdx] = (data[srcIdx] || 0) / 255;
+        floatData[dstIdx + 1] = (data[srcIdx + 1] || 0) / 255;
+        floatData[dstIdx + 2] = (data[srcIdx + 2] || 0) / 255;
+      }
+    }
+
+    return floatData;
+  };
 
   const calculateResistance = () => {
     if (!detectedColors || detectedColors.length < 3) {
@@ -126,31 +238,153 @@ export default function Vision() {
     return { value: resistance, tolerance, tempCoeff };
   };
 
-  const { value, tolerance, tempCoeff } = calculateResistance();
-
-  const handleManualCapture = async () => {
-    setIsProcessing(true);
+  // Editing colors in calculator
+  const handleEditColors = useCallback(async () => {
+    if (!detectedColors) return;
 
     try {
-      await AsyncStorage.setItem('visionInstructionsShown', 'true');
-      setShowInstructions(false);
+      await AsyncStorage.setItem('detectedColors', JSON.stringify(detectedColors));
+      await AsyncStorage.setItem('bandCount', String(bandCount));
+      router.push('/');
     } catch (error) {
-      console.log('Error saving instructions state:', error);
+      Alert.alert(t('vision.noResistorDetected'), t('vision.cameraPermissionMessage'));
     }
+  }, [detectedColors, bandCount, router, t]);
 
-    setTimeout(() => {
-      const testColors: ColorName[] = ["brown", "black", "red", "gold"];
-      handleColorDetection(testColors);
-      setIsProcessing(false);
-    }, 1000);
-  };
+  const { value, tolerance, tempCoeff } = calculateResistance();
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    permissionContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+      paddingTop: 100,
+    },
+    cameraContainer: {
+      flex: 1,
+      position: "relative",
+    },
+    camera: {
+      flex: 1,
+    },
+    overlay: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    guideline: {
+      width: "35%",
+      height: 80,
+      borderWidth: 2,
+      borderColor: "#00ff00",
+      borderRadius: 8,
+      backgroundColor: "transparent",
+    },
+    instructionText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "600",
+      marginTop: 20,
+      backgroundColor: "rgba(0,0,0,0.6)",
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 8,
+    },
+    resultsContainer: {
+      backgroundColor: colors.surface,
+      padding: 20,
+      paddingTop: 30,
+    },
+    placeholderContainer: {
+      backgroundColor: colors.cardBackground,
+      padding: 30,
+      borderRadius: 10,
+      alignItems: "center",
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    placeholderText: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: "center",
+    },
+    captureButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 16,
+      borderRadius: 10,
+      alignItems: "center",
+      marginTop: 10,
+    },
+    captureButtonDisabled: {
+      backgroundColor: colors.textSecondary,
+    },
+    captureButtonText: {
+      color: "#fff",
+      fontSize: 18,
+      fontWeight: "600",
+    },
+    editButton: {
+      backgroundColor: colors.success,
+      paddingVertical: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      marginTop: 12,
+    },
+    editButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    modelStatusContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 12,
+      padding: 8,
+    },
+    modelStatusText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginLeft: 8,
+    },
+    permissionText: {
+      fontSize: 18,
+      color: colors.text,
+      textAlign: "center",
+      marginBottom: 20,
+    },
+    permissionButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 16,
+      paddingHorizontal: 32,
+      borderRadius: 10,
+    },
+    permissionButtonText: {
+      color: "#fff",
+      fontSize: 18,
+      fontWeight: "600",
+    },
+  });
+
 
   if (!hasPermission) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.permissionText}>Brak uprawnień do kamery</Text>
+      <View style={styles.permissionContainer}>
+        <Text style={styles.permissionText}>{t('vision.cameraPermission')}</Text>
+        <Text style={styles.permissionText}>{t('vision.cameraPermissionMessage')}</Text>
         <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-          <Text style={styles.permissionButtonText}>Przyznaj uprawnienia</Text>
+          <Text style={styles.permissionButtonText}>{t('vision.cameraPermissionButton')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -158,8 +392,8 @@ export default function Vision() {
 
   if (!device) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.permissionText}>Nie znaleziono kamery</Text>
+      <View style={styles.permissionContainer}>
+        <Text style={styles.permissionText}>{t('vision.cameraRestricted')}</Text>
       </View>
     );
   }
@@ -168,16 +402,18 @@ export default function Vision() {
     <View style={styles.container}>
       <View style={styles.cameraContainer}>
         <Camera
+          ref={cameraRef}
           style={styles.camera}
           device={device}
           isActive={isActive}
           onError={handleCameraError}
+          photo={true}
         />
 
         <View style={styles.overlay}>
           <View style={styles.guideline} />
           <Text style={styles.instructionText}>
-            Skieruj kamerę na rezystor
+            {t('vision.alignResistor')}
           </Text>
         </View>
       </View>
@@ -193,7 +429,7 @@ export default function Vision() {
         ) : (
           <View style={styles.placeholderContainer}>
             <Text style={styles.placeholderText}>
-              Oczekiwanie na detekcję rezystora...
+              {t('vision.holdSteady')}
             </Text>
           </View>
         )}
@@ -201,106 +437,42 @@ export default function Vision() {
         <TouchableOpacity
           style={[styles.captureButton, isProcessing && styles.captureButtonDisabled]}
           onPress={handleManualCapture}
-          disabled={isProcessing}
+          disabled={isProcessing || !detectionModel || !colorModel}
         >
           {isProcessing ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.captureButtonText}>Rozpoznaj rezystor</Text>
+            <Text style={styles.captureButtonText}>{t('vision.recognizeResistor')}</Text>
           )}
         </TouchableOpacity>
+
+        {/* Edit button */}
+        {detectedColors && (
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={handleEditColors}
+          >
+            <Text style={styles.editButtonText}>{t('vision.edit')}</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* ML model status */}
+        {(detectionPlugin.state === 'loading' || colorPlugin.state === 'loading') && (
+          <View style={styles.modelStatusContainer}>
+            <ActivityIndicator color="#4CAF50" size="small" />
+            <Text style={styles.modelStatusText}>{t('common.loading')}</Text>
+          </View>
+        )}
+        {(detectionPlugin.state === 'error' || colorPlugin.state === 'error') && (
+          <View style={styles.modelStatusContainer}>
+            <Text style={[styles.modelStatusText, { color: '#f44336' }]}>
+              ⚠️ {t('vision.noResistorDetected')}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  cameraContainer: {
-    flex: 1,
-    position: "relative",
-  },
-  camera: {
-    flex: 1,
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  guideline: {
-    width: "80%",
-    height: 200,
-    borderWidth: 3,
-    borderColor: "#00ff00",
-    borderRadius: 10,
-    backgroundColor: "transparent",
-  },
-  instructionText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 20,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  resultsContainer: {
-    backgroundColor: "#f5f5f5",
-    padding: 20,
-    paddingTop: 30,
-  },
-  placeholderContainer: {
-    backgroundColor: "#fff",
-    padding: 30,
-    borderRadius: 10,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-  },
-  captureButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 16,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  captureButtonDisabled: {
-    backgroundColor: "#999",
-  },
-  captureButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  permissionText: {
-    fontSize: 18,
-    color: "#fff",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  permissionButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 10,
-  },
-  permissionButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-});
 

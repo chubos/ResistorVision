@@ -1,5 +1,5 @@
 /**
- * Hook do zarządzania stanem detekcji rezystora
+ * Manage the state of resistor detection results
  */
 
 import { useState, useCallback } from "react";

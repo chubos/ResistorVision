@@ -5,7 +5,8 @@ module.exports = function (api) {
       ['babel-preset-expo', { jsxImportSource: 'react' }]
     ],
     plugins: [
-      // 'react-native-worklets/plugin', // Tymczasowo wyłączone - powoduje problemy z uruchomieniem
+      // react-native-reanimated/plugin musi być ostatni
+      // Obsługuje też worklets dla vision-camera
       'react-native-reanimated/plugin',
     ],
   };

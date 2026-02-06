@@ -1,4 +1,5 @@
 import { View, StyleSheet } from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const RESISTOR_COLORS = {
   black: { color: "#000000" },
@@ -23,6 +24,55 @@ interface ResistorDisplayProps {
 }
 
 export default function ResistorDisplay({ colors, bandCount }: ResistorDisplayProps) {
+  const { colors: themeColors } = useTheme();
+
+  const styles = StyleSheet.create({
+    resistorContainer: {
+      backgroundColor: themeColors.cardBackground,
+      padding: 30,
+      borderRadius: 10,
+      marginBottom: 30,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: themeColors.border,
+    },
+    resistor: {
+      flexDirection: "row",
+      alignItems: "center",
+      width: "100%",
+      maxWidth: 340,
+    },
+    resistorLead: {
+      width: 38,
+      height: 3,
+      backgroundColor: "#C0C0C0",
+      borderRadius: 2,
+    },
+    resistorBody: {
+      flex: 1,
+      height: 38,
+      backgroundColor: "#E6D7C0",
+      borderRadius: 12,
+      flexDirection: "row",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+      paddingHorizontal: 12,
+      borderTopWidth: 1,
+      borderTopColor: "#F2EBDF",
+      borderBottomWidth: 1,
+      borderBottomColor: "#CCB895",
+    },
+    resistorBand: {
+      width: 8,
+      height: "100%",
+      borderRadius: 2,
+    },
+    whiteBandBorder: {
+      borderWidth: 1,
+      borderColor: "#ccc",
+    },
+  });
+
   return (
     <View style={styles.resistorContainer}>
       <View style={styles.resistor}>
@@ -44,49 +94,3 @@ export default function ResistorDisplay({ colors, bandCount }: ResistorDisplayPr
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  resistorContainer: {
-    backgroundColor: "#fff",
-    padding: 30,
-    borderRadius: 10,
-    marginBottom: 30,
-    alignItems: "center",
-  },
-  resistor: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    maxWidth: 340,
-  },
-  resistorLead: {
-    width: 38,
-    height: 3,
-    backgroundColor: "#C0C0C0",
-    borderRadius: 2,
-  },
-  resistorBody: {
-    flex: 1,
-    height: 38,
-    backgroundColor: "#E6D7C0",
-    borderRadius: 12,
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F2EBDF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#CCB895",
-  },
-  resistorBand: {
-    width: 9,
-    height: 34,
-    borderRadius: 3,
-  },
-  whiteBandBorder: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-  },
-});
-

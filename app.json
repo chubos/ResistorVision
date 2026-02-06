@@ -1,39 +1,57 @@
 {
   "expo": {
     "name": "ResistorVision",
-    "slug": "ResistorVision",
+    "slug": "resistorvision",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "resistorvision",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#c57500"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.chubos.resistorvision",
+      "buildNumber": "1",
       "infoPlist": {
-        "NSCameraUsageDescription": "ResistorVision potrzebuje dostępu do kamery, aby rozpoznawać kolory pasków rezystorów."
+        "NSCameraUsageDescription": "ResistorVision potrzebuje dostępu do kamery, aby rozpoznawać kolory pasków rezystorów.",
+        "UIRequiresFullScreen": false,
+        "UIStatusBarHidden": false
+      },
+      "locales": {
+        "pl": {
+          "NSCameraUsageDescription": "ResistorVision potrzebuje dostępu do kamery, aby rozpoznawać kolory pasków rezystorów."
+        }
       }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundImage": "./assets/images/icon.png",
-        "monochromeImage": "./assets/images/icon.png"
+        "backgroundColor": "#c57500",
+        "foregroundImage": "./assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
       "permissions": [
-        "CAMERA",
-        "android.permission.CAMERA",
         "CAMERA",
         "android.permission.CAMERA"
       ],
-      "package": "com.chubos.ResistorVision"
+      "package": "com.chubos.resistorvision",
+      "versionCode": 1,
+      "screenOrientation": "portrait",
+      "resizeableActivity": true,
+      "supportsPictureInPicture": false,
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/icon.png",
+      "bundler": "metro"
     },
     "plugins": [
       "expo-router",
@@ -43,9 +61,10 @@
           "image": "./assets/images/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#c57500",
           "dark": {
-            "backgroundColor": "#000000"
+            "image": "./assets/images/icon.png",
+            "backgroundColor": "#c57500"
           }
         }
       ],
@@ -65,6 +84,13 @@
       "exclude": [
         "expo-camera"
       ]
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "500eb1dc-b562-48f4-a132-cb1eb852439b"
+      },
+      "router": {}
+    },
+    "owner": "chubos"
   }
 }

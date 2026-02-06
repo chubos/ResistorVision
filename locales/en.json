@@ -1,0 +1,103 @@
+{
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "loading": "Loading..."
+  },
+  "tabs": {
+    "home": "Home",
+    "vision": "Vision"
+  },
+  "home": {
+    "title": "Resistor Calculator",
+    "resistance": "Resistance",
+    "tolerance": "Tolerance",
+    "bandCount": "Number of bands",
+    "selectBandCount": "Select number of bands",
+    "bands": "bands",
+    "selectColor": "Select color for band {{number}}",
+    "selectColors": "Select band colors",
+    "band": "Band",
+    "instructions": "Select the number of bands, then choose colors for each band to calculate resistance.",
+    "settings": "Settings"
+  },
+  "vision": {
+    "title": "Scan Resistor",
+    "scanning": "Scanning...",
+    "recognizeResistor": "Recognize Resistor",
+    "processing": "Processing...",
+    "noResistorDetected": "No resistor detected",
+    "alignResistor": "Align the resistor in the green frame",
+    "holdSteady": "Hold steady...",
+    "result": "Result",
+    "edit": "Edit",
+    "scanAgain": "Scan Again",
+    "detectedBands": "Detected {{count}} bands",
+    "needMoreBands": "Detected only {{count}} bands (need at least 3). Move camera closer to resistor.",
+    "resistorNotDetected": "Resistor not detected. Make sure the resistor is clearly visible in the frame.",
+    "noColorResults": "No results from color model",
+    "noBandsDetected": "No bands detected. Make sure the resistor is clearly visible.",
+    "processingError": "Processing error: {{error}}",
+    "detectedBandsWithColors": "Detected {{count}} bands: {{colors}}",
+    "cameraPermission": "Camera permission required",
+    "cameraPermissionMessage": "Please enable camera access in settings to use this feature.",
+    "cameraPermissionButton": "Grant permissions",
+    "cameraRestricted": "Camera access is restricted. Please check your device settings.",
+    "instructions": {
+      "step1": "Place resistor in the green frame",
+      "step2": "Make sure there is good lighting",
+      "step3": "Hold the camera steady",
+      "step4": "Click the button to recognize"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeAuto": "Auto",
+    "language": "Language",
+    "privacyPolicy": "Privacy Policy and Terms",
+    "contact": "Contact Us",
+    "version": "Version"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "intro": "Resistor Vision respects the privacy of users of its mobile application.",
+    "section1Title": "1. Data Collection",
+    "section1Text": "Resistor Vision does not collect, store or process any personal data of users.",
+    "section2Title": "2. Local Data Storage",
+    "section2Text": "All data created in the application (such as theme preferences or detected resistor values) is stored locally on the user's device and is not sent to external servers.",
+    "section3Title": "3. Camera Permissions",
+    "section3Text": "The application requires access to the device camera solely for the purpose of recognizing resistor color bands. Photos are processed locally on the device and are not transmitted, saved, or shared with any third parties.",
+    "section4Title": "4. Data Sharing",
+    "section4Text": "Resistor Vision does not sell, rent or share any user data with third parties.",
+    "section5Title": "5. External Services",
+    "section5Text": "The application uses a machine learning model (TensorFlow Lite) for color recognition, which operates completely offline on the user's device. No external services are used that collect user data.",
+    "section6Title": "6. Security",
+    "section6Text": "Resistor Vision does not transmit any user data over the internet. All operations are performed locally on the device.",
+    "section7Title": "7. Policy Changes",
+    "section7Text": "This privacy policy may be updated if the functionality of the application changes. Any updates will be reflected in the application.",
+    "section8Title": "8. Contact",
+    "section8Text": "If you have any questions about this privacy policy, please contact us.",
+    "company": "© 2026 Resistor Vision"
+  },
+  "colors": {
+    "black": "Black",
+    "brown": "Brown",
+    "red": "Red",
+    "orange": "Orange",
+    "yellow": "Yellow",
+    "green": "Green",
+    "blue": "Blue",
+    "purple": "Purple",
+    "gray": "Gray",
+    "white": "White",
+    "gold": "Gold",
+    "silver": "Silver"
+  }
+}

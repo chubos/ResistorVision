@@ -1,4 +1,6 @@
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 const RESISTOR_COLORS = {
   black: { value: 0, multiplier: 1, tolerance: null, tempCoeff: null, color: "#000000" },
@@ -24,6 +26,67 @@ interface ColorSelectorProps {
 }
 
 export default function ColorSelector({ bandCount, selectedColors, onColorSelect }: ColorSelectorProps) {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+
+  const styles = StyleSheet.create({
+    colorSelectionContainer: {
+      backgroundColor: colors.cardBackground,
+      padding: 20,
+      borderRadius: 10,
+      marginBottom: 20,
+      borderColor: colors.border,
+      borderWidth: 1,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 15,
+      color: colors.text,
+    },
+    colorColumns: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    colorColumn: {
+      flex: 1,
+      marginHorizontal: 5,
+    },
+    columnLabel: {
+      fontSize: 12,
+      fontWeight: "600",
+      marginBottom: 10,
+      textAlign: "center",
+      color: colors.textSecondary,
+    },
+    colorButtons: {
+      flexDirection: "column",
+      gap: 8,
+    },
+    colorButton: {
+      width: "100%",
+      height: 40,
+      borderRadius: 5,
+      borderWidth: 1,
+      borderColor: colors.border,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    colorButtonText: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: "#fff",
+      textAlign: "center",
+    },
+    darkText: {
+      color: "#333",
+    },
+    selectedColorButton: {
+      borderColor: colors.primary,
+      borderWidth: 4,
+    },
+  });
+
   const getAvailableColors = (bandIndex: number): ColorName[] => {
     const colors = Object.keys(RESISTOR_COLORS) as ColorName[];
 
@@ -64,27 +127,27 @@ export default function ColorSelector({ bandCount, selectedColors, onColorSelect
 
   const getBandLabel = (bandIndex: number): string => {
     if (bandCount === 3) {
-      if (bandIndex === 0) return "Cyfra 1";
-      if (bandIndex === 1) return "Cyfra 2";
-      return "Mnożnik";
+      if (bandIndex === 0) return t('home.band') + " 1";
+      if (bandIndex === 1) return t('home.band') + " 2";
+      return t('home.band') + " 3";
     } else if (bandCount === 4) {
-      if (bandIndex === 0) return "Cyfra 1";
-      if (bandIndex === 1) return "Cyfra 2";
-      if (bandIndex === 2) return "Mnożnik";
-      return "Tolerancja";
+      if (bandIndex === 0) return t('home.band') + " 1";
+      if (bandIndex === 1) return t('home.band') + " 2";
+      if (bandIndex === 2) return t('home.band') + " 3";
+      return t('home.tolerance');
     } else if (bandCount === 5) {
-      if (bandIndex === 0) return "Cyfra 1";
-      if (bandIndex === 1) return "Cyfra 2";
-      if (bandIndex === 2) return "Cyfra 3";
-      if (bandIndex === 3) return "Mnożnik";
-      return "Tolerancja";
+      if (bandIndex === 0) return t('home.band') + " 1";
+      if (bandIndex === 1) return t('home.band') + " 2";
+      if (bandIndex === 2) return t('home.band') + " 3";
+      if (bandIndex === 3) return t('home.band') + " 4";
+      return t('home.tolerance');
     } else {
-      if (bandIndex === 0) return "Cyfra 1";
-      if (bandIndex === 1) return "Cyfra 2";
-      if (bandIndex === 2) return "Cyfra 3";
-      if (bandIndex === 3) return "Mnożnik";
-      if (bandIndex === 4) return "Tolerancja";
-      return "Temp. Coeff.";
+      if (bandIndex === 0) return t('home.band') + " 1";
+      if (bandIndex === 1) return t('home.band') + " 2";
+      if (bandIndex === 2) return t('home.band') + " 3";
+      if (bandIndex === 3) return t('home.band') + " 4";
+      if (bandIndex === 4) return t('home.tolerance');
+      return t('home.band') + " 6";
     }
   };
 
@@ -135,7 +198,7 @@ export default function ColorSelector({ bandCount, selectedColors, onColorSelect
       } else if (bandIndex === 4) {
         return `±${color.tolerance}%`;
       } else {
-        // Temp. Coeff. - pokazuj tylko wartość liczbową
+        // Temp. Coeff.
         return color.tempCoeff !== null ? `${color.tempCoeff}` : colorName;
       }
     }
@@ -143,7 +206,7 @@ export default function ColorSelector({ bandCount, selectedColors, onColorSelect
 
   return (
     <View style={styles.colorSelectionContainer}>
-      <Text style={styles.sectionTitle}>Wybierz kolory pasków:</Text>
+      <Text style={styles.sectionTitle}>{t('home.selectColors')}</Text>
       <View style={styles.colorColumns}>
         {Array.from({ length: bandCount }).map((_, bandIndex) => (
           <View key={bandIndex} style={styles.colorColumn}>
@@ -181,61 +244,4 @@ export default function ColorSelector({ bandCount, selectedColors, onColorSelect
   );
 }
 
-const styles = StyleSheet.create({
-  colorSelectionContainer: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-    borderColor: "#ddd",
-    borderWidth: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#333",
-  },
-  colorColumns: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  colorColumn: {
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  columnLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 10,
-    textAlign: "center",
-    color: "#666",
-  },
-  colorButtons: {
-    flexDirection: "column",
-    gap: 8,
-  },
-  colorButton: {
-    width: "100%",
-    height: 40,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#474747",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  colorButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#fff",
-    textAlign: "center",
-  },
-  darkText: {
-    color: "#333",
-  },
-  selectedColorButton: {
-    borderColor: "#007AFF",
-    borderWidth: 4,
-  },
-});
 
