@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { StyleSheet, ScrollView, View, Modal, Text, TouchableOpacity, Platform, StatusBar as RNStatusBar } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
@@ -29,7 +28,7 @@ const RESISTOR_COLORS = {
 type ColorName = keyof typeof RESISTOR_COLORS;
 
 export default function Index() {
-  const { colors, theme, setTheme, isDark } = useTheme();
+  const { colors, theme, setTheme } = useTheme();
   const { t } = useTranslation();
   const [bandCount, setBandCount] = useState<3 | 4 | 5 | 6>(4);
   const [modalSettingsVisible, setModalSettingsVisible] = useState(false);
@@ -334,7 +333,6 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style={isDark ? "light" : "dark"} animated={true} />
       {/* Settings */}
       <Modal
         animationType="fade"

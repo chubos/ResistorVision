@@ -1,4 +1,4 @@
-package com.chubos.ResistorVision
+package com.chubos.resistorvision
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

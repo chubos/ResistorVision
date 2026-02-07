@@ -1,4 +1,4 @@
-package com.chubos.ResistorVision
+package com.chubos.resistorvision
 
 import android.app.Application
 import android.content.res.Configuration

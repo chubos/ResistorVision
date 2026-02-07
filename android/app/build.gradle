@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.chubos.ResistorVision'
+    namespace 'com.chubos.resistorvision'
     defaultConfig {
-        applicationId 'com.chubos.ResistorVision'
+        applicationId 'com.chubos.resistorvision'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

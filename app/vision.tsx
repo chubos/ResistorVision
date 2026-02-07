@@ -1,5 +1,4 @@
 import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
 import { useFocusEffect } from "@react-navigation/native";
@@ -387,7 +386,6 @@ export default function Vision() {
   if (!hasPermission) {
     return (
       <View style={styles.permissionContainer}>
-        <StatusBar style="light" animated={true} />
         <Text style={styles.permissionText}>{t('vision.cameraPermission')}</Text>
         <Text style={styles.permissionText}>{t('vision.cameraPermissionMessage')}</Text>
         <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
@@ -400,7 +398,6 @@ export default function Vision() {
   if (!device) {
     return (
       <View style={styles.permissionContainer}>
-        <StatusBar style="light" animated={true} />
         <Text style={styles.permissionText}>{t('vision.cameraRestricted')}</Text>
       </View>
     );
@@ -408,7 +405,6 @@ export default function Vision() {
 
   return (
     <View style={styles.container} collapsable={false}>
-      <StatusBar style="light" animated={true} />
       <View style={[styles.cameraContainer, { backgroundColor: isActive ? "#000" : "transparent" }]} collapsable={false}>
         {isActive && device && (
           <Camera

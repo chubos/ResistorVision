@@ -47,7 +47,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     text: '#000000',
     textSecondary: '#666666',
     border: '#e0e0e0',
-    primary: '#c57500',
+    primary: '#ff9800',
     success: '#4CAF50',
     error: '#f44336',
     cardBackground: '#ffffff',

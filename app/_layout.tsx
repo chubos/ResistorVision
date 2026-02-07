@@ -1,15 +1,34 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect } from "react";
+import { Platform } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
+import * as NavigationBar from "expo-navigation-bar";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 import "../i18n";
 
 function TabsLayout() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { t } = useTranslation();
 
+  // Set system navigation bar color and style based on theme
+  useEffect(() => {
+    const updateNavigationBar = async () => {
+      if (Platform.OS === 'android') {
+        await SystemUI.setBackgroundColorAsync(colors.surface);
+        // Set button style: 'dark' for light theme, 'light' for dark theme
+        await NavigationBar.setButtonStyleAsync(isDark ? 'light' : 'dark');
+      }
+    };
+    updateNavigationBar();
+  }, [colors.surface, isDark]);
+
   return (
-    <Tabs
+    <>
+      <StatusBar style={isDark ? "light" : "dark"} animated={true} />
+      <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
@@ -39,6 +58,7 @@ function TabsLayout() {
         }}
       />
     </Tabs>
+    </>
   );
 }
 
