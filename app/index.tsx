@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { StyleSheet, ScrollView, View, Modal, Text, TouchableOpacity, Platform, StatusBar as RNStatusBar } from "react-native";
+import { StyleSheet, ScrollView, View, Modal, Text, TouchableOpacity, Platform, StatusBar as RNStatusBar, useWindowDimensions } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -30,6 +31,9 @@ type ColorName = keyof typeof RESISTOR_COLORS;
 export default function Index() {
   const { colors, theme, setTheme } = useTheme();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
   const [bandCount, setBandCount] = useState<3 | 4 | 5 | 6>(4);
   const [modalSettingsVisible, setModalSettingsVisible] = useState(false);
   const [modalPrivacyVisible, setModalPrivacyVisible] = useState(false);
@@ -129,6 +133,8 @@ export default function Index() {
       flex: 1,
       backgroundColor: colors.background,
       paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
+      paddingLeft: insets.left,
+      paddingRight: insets.right,
     },
     scrollView: {
       flex: 1,
@@ -171,8 +177,9 @@ export default function Index() {
       backgroundColor: colors.surface,
       borderRadius: 20,
       padding: 24,
-      width: '80%',
-      maxWidth: 400,
+      width: isLandscape ? '60%' : '80%',
+      maxWidth: isLandscape ? 600 : 400,
+      alignSelf: 'center',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
@@ -186,16 +193,23 @@ export default function Index() {
       marginBottom: 20,
       textAlign: 'center',
     },
+    themeOptionsContainer: {
+      flexDirection: isLandscape ? 'row' : 'column',
+      gap: 12,
+    },
     themeOption: {
+      flex: isLandscape ? 1 : undefined,
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'center',
       paddingVertical: 16,
       paddingHorizontal: 16,
       borderRadius: 12,
-      marginBottom: 12,
+      marginBottom: isLandscape ? 0 : 12,
       backgroundColor: colors.cardBackground,
       borderWidth: 2,
       borderColor: colors.border,
+      minWidth: isLandscape ? 0 : undefined,
     },
     themeOptionSelected: {
       borderColor: colors.primary,
@@ -345,69 +359,67 @@ export default function Index() {
           activeOpacity={1}
           onPress={() => setModalSettingsVisible(false)}
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{t('settings.title')}</Text>
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+            <Text style={styles.modalTitle}>{t('settings.title')}</Text>
 
-              {/* Mode */}
-              <Text style={styles.sectionTitle}>{t('settings.theme')}</Text>
+            {/* Mode */}
+            <Text style={styles.sectionTitle}>{t('settings.theme')}</Text>
 
-              <TouchableOpacity
-                style={[
-                  styles.themeOption,
-                  theme === 'light' && styles.themeOptionSelected,
-                ]}
-                onPress={() => setTheme('light')}
-              >
-                <Ionicons
-                  name={getThemeIcon('light')}
-                  size={24}
-                  color={theme === 'light' ? colors.primary : colors.text}
-                  style={styles.themeIcon}
-                />
-                <Text style={styles.themeOptionText}>
-                  {getThemeLabel('light')}
-                </Text>
-              </TouchableOpacity>
+            <View style={styles.themeOptionsContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.themeOption,
+                    theme === 'light' && styles.themeOptionSelected,
+                  ]}
+                  onPress={() => setTheme('light')}
+                >
+                  <Ionicons
+                    name={getThemeIcon('light')}
+                    size={24}
+                    color={theme === 'light' ? colors.primary : colors.text}
+                    style={styles.themeIcon}
+                  />
+                  <Text style={styles.themeOptionText}>
+                    {getThemeLabel('light')}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.themeOption,
-                  theme === 'dark' && styles.themeOptionSelected,
-                ]}
-                onPress={() => setTheme('dark')}
-              >
-                <Ionicons
-                  name={getThemeIcon('dark')}
-                  size={24}
-                  color={theme === 'dark' ? colors.primary : colors.text}
-                  style={styles.themeIcon}
-                />
-                <Text style={styles.themeOptionText}>
-                  {getThemeLabel('dark')}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.themeOption,
+                    theme === 'dark' && styles.themeOptionSelected,
+                  ]}
+                  onPress={() => setTheme('dark')}
+                >
+                  <Ionicons
+                    name={getThemeIcon('dark')}
+                    size={24}
+                    color={theme === 'dark' ? colors.primary : colors.text}
+                    style={styles.themeIcon}
+                  />
+                  <Text style={styles.themeOptionText}>
+                    {getThemeLabel('dark')}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.themeOption,
-                  theme === 'auto' && styles.themeOptionSelected,
-                ]}
-                onPress={() => setTheme('auto')}
-              >
-                <Ionicons
-                  name={getThemeIcon('auto')}
-                  size={24}
-                  color={theme === 'auto' ? colors.primary : colors.text}
-                  style={styles.themeIcon}
-                />
-                <Text style={styles.themeOptionText}>
-                  {getThemeLabel('auto')}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.themeOption,
+                    theme === 'auto' && styles.themeOptionSelected,
+                  ]}
+                  onPress={() => setTheme('auto')}
+                >
+                  <Ionicons
+                    name={getThemeIcon('auto')}
+                    size={24}
+                    color={theme === 'auto' ? colors.primary : colors.text}
+                    style={styles.themeIcon}
+                  />
+                  <Text style={styles.themeOptionText}>
+                    {getThemeLabel('auto')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
               {/* Divider */}
               <View style={styles.sectionDivider} />
@@ -434,8 +446,7 @@ export default function Index() {
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
+        </Modal>
 
       {/* Privacy Policy Modal */}
       <Modal

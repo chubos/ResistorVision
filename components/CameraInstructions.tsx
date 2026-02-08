@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -10,6 +10,8 @@ interface CameraInstructionsProps {
 export default function CameraInstructions({ step = 1 }: CameraInstructionsProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const instructions = [
     {
@@ -33,16 +35,16 @@ export default function CameraInstructions({ step = 1 }: CameraInstructionsProps
   const styles = StyleSheet.create({
     container: {
       backgroundColor: colors.cardBackground,
-      padding: 15,
+      padding: isLandscape ? 10 : 15,
       borderRadius: 10,
-      marginBottom: 20,
+      marginBottom: isLandscape ? 10 : 20,
       borderWidth: 1,
       borderColor: colors.border,
     },
     instructionRow: {
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 8,
+      paddingVertical: isLandscape ? 4 : 8,
     },
     activeStep: {
       backgroundColor: colors.primary + '15',
@@ -51,7 +53,7 @@ export default function CameraInstructions({ step = 1 }: CameraInstructionsProps
       marginHorizontal: -10,
     },
     instructionText: {
-      fontSize: 14,
+      fontSize: isLandscape ? 12 : 14,
       color: colors.textSecondary,
       marginLeft: 10,
     },

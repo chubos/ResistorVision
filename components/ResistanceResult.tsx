@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, useWindowDimensions } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 
@@ -11,6 +11,9 @@ interface ResistanceResultProps {
 export default function ResistanceResult({ value, tolerance, tempCoeff }: ResistanceResultProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
   const formatResistance = () => {
     let unit = "Ω";
 
@@ -44,25 +47,25 @@ export default function ResistanceResult({ value, tolerance, tempCoeff }: Resist
   const styles = StyleSheet.create({
     resultContainer: {
       backgroundColor: colors.cardBackground,
-      padding: 20,
+      padding: isLandscape ? 15 : 20,
       borderRadius: 10,
       alignItems: "center",
-      marginBottom: 30,
+      marginBottom: isLandscape ? 10 : 30,
       borderWidth: 1,
       borderColor: colors.border,
     },
     resultLabel: {
-      fontSize: 18,
+      fontSize: isLandscape ? 14 : 18,
       color: colors.textSecondary,
-      marginBottom: 5,
+      marginBottom: isLandscape ? 3 : 5,
     },
     resultValue: {
-      fontSize: 36,
+      fontSize: isLandscape ? 24 : 36,
       fontWeight: "bold",
       color: colors.text,
     },
     resultValueSmall: {
-      fontSize: 28,
+      fontSize: isLandscape ? 20 : 28,
     },
   });
 

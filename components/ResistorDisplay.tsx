@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, useWindowDimensions } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 
 const RESISTOR_COLORS = {
@@ -25,13 +25,15 @@ interface ResistorDisplayProps {
 
 export default function ResistorDisplay({ colors, bandCount }: ResistorDisplayProps) {
   const { colors: themeColors } = useTheme();
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const styles = StyleSheet.create({
     resistorContainer: {
       backgroundColor: themeColors.cardBackground,
-      padding: 30,
+      padding: isLandscape ? 15 : 30,
       borderRadius: 10,
-      marginBottom: 30,
+      marginBottom: isLandscape ? 0 : 30,
       alignItems: "center",
       borderWidth: 1,
       borderColor: themeColors.border,

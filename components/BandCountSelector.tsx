@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, useWindowDimensions } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 
@@ -10,12 +10,15 @@ interface BandCountSelectorProps {
 export default function BandCountSelector({ bandCount, onBandCountChange }: BandCountSelectorProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const styles = StyleSheet.create({
     bandCountContainer: {
       backgroundColor: colors.cardBackground,
       padding: 20,
       borderRadius: 10,
+      marginTop: isLandscape ? 20 : 0,
       marginBottom: 20,
       borderWidth: 1,
       borderColor: colors.border,

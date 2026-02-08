@@ -1,7 +1,8 @@
-import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator, useWindowDimensions } from "react-native";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Camera, useCameraDevice, useCameraPermission } from "react-native-vision-camera";
 import { useFocusEffect } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -42,6 +43,9 @@ export default function Vision() {
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back');
   const cameraRef = useRef<Camera>(null);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const insets = useSafeAreaInsets();
 
   const [isActive, setIsActive] = useState(true);
   const [detectedColors, setDetectedColors] = useState<ColorName[] | null>(null);
@@ -257,6 +261,7 @@ export default function Vision() {
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      flexDirection: isLandscape ? 'row' : 'column',
     },
     permissionContainer: {
       flex: 1,
@@ -267,7 +272,8 @@ export default function Vision() {
       paddingTop: 100,
     },
     cameraContainer: {
-      flex: 1,
+      width: isLandscape ? '50%' : undefined,
+      flex: isLandscape ? undefined : 1,
       position: "relative",
       overflow: "hidden",
     },
@@ -306,16 +312,22 @@ export default function Vision() {
       borderRadius: 8,
     },
     resultsContainer: {
+      width: isLandscape ? '50%' : undefined,
+      flex: isLandscape ? undefined : undefined,
       backgroundColor: colors.surface,
       padding: 20,
-      paddingTop: 30,
+      paddingTop: isLandscape ? 15 : 30,
+      paddingLeft: isLandscape ? Math.max(20, insets.left) : 20,
+      paddingRight: isLandscape ? Math.max(20, insets.right) : 20,
+      paddingBottom: isLandscape ? Math.max(80, insets.bottom + 80) : 20,
+      justifyContent: isLandscape ? 'space-between' : undefined,
     },
     placeholderContainer: {
       backgroundColor: colors.cardBackground,
-      padding: 30,
+      padding: isLandscape ? 20 : 30,
       borderRadius: 10,
       alignItems: "center",
-      marginBottom: 20,
+      marginBottom: isLandscape ? 0 : 20,
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -326,10 +338,10 @@ export default function Vision() {
     },
     captureButton: {
       backgroundColor: colors.primary,
-      paddingVertical: 16,
+      paddingVertical: isLandscape ? 12 : 16,
       borderRadius: 10,
       alignItems: "center",
-      marginTop: 10,
+      marginTop: isLandscape ? 10 : 10,
     },
     captureButtonDisabled: {
       backgroundColor: colors.textSecondary,
@@ -341,10 +353,10 @@ export default function Vision() {
     },
     editButton: {
       backgroundColor: colors.success,
-      paddingVertical: 14,
+      paddingVertical: isLandscape ? 10 : 14,
       borderRadius: 10,
       alignItems: "center",
-      marginTop: 12,
+      marginTop: isLandscape ? 10 : 12,
     },
     editButtonText: {
       color: "#fff",
@@ -355,8 +367,8 @@ export default function Vision() {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      marginTop: 12,
-      padding: 8,
+      marginTop: isLandscape ? 10 : 12,
+      padding: isLandscape ? 6 : 8,
     },
     modelStatusText: {
       fontSize: 14,
@@ -426,59 +438,111 @@ export default function Vision() {
         </View>
       </View>
 
-      <View style={styles.resultsContainer}>
-        {showInstructions && <CameraInstructions step={detectedColors ? 4 : 1} />}
+      {isLandscape ? (
+        <View style={styles.resultsContainer}>
+          {showInstructions && <CameraInstructions step={detectedColors ? 4 : 1} />}
 
-        {detectedColors ? (
-          <>
-            <ResistanceResult value={value} tolerance={tolerance} tempCoeff={tempCoeff} />
-            <ResistorDisplay colors={detectedColors} bandCount={bandCount} />
-          </>
-        ) : (
-          <View style={styles.placeholderContainer}>
-            <Text style={styles.placeholderText}>
-              {t('vision.holdSteady')}
-            </Text>
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={[styles.captureButton, isProcessing && styles.captureButtonDisabled]}
-          onPress={handleManualCapture}
-          disabled={isProcessing || !detectionModel || !colorModel}
-        >
-          {isProcessing ? (
-            <ActivityIndicator color="#fff" />
+          {detectedColors ? (
+            <>
+              <ResistanceResult value={value} tolerance={tolerance} tempCoeff={tempCoeff} />
+              <ResistorDisplay colors={detectedColors} bandCount={bandCount} />
+            </>
           ) : (
-            <Text style={styles.captureButtonText}>{t('vision.recognizeResistor')}</Text>
+            <View style={styles.placeholderContainer}>
+              <Text style={styles.placeholderText}>
+                {t('vision.holdSteady')}
+              </Text>
+            </View>
           )}
-        </TouchableOpacity>
 
-        {/* Edit button */}
-        {detectedColors && (
           <TouchableOpacity
-            style={styles.editButton}
-            onPress={handleEditColors}
+            style={[styles.captureButton, isProcessing && styles.captureButtonDisabled]}
+            onPress={handleManualCapture}
+            disabled={isProcessing || !detectionModel || !colorModel}
           >
-            <Text style={styles.editButtonText}>{t('vision.edit')}</Text>
+            {isProcessing ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.captureButtonText}>{t('vision.recognizeResistor')}</Text>
+            )}
           </TouchableOpacity>
-        )}
 
-        {/* ML model status */}
-        {(detectionPlugin.state === 'loading' || colorPlugin.state === 'loading') && (
-          <View style={styles.modelStatusContainer}>
-            <ActivityIndicator color="#4CAF50" size="small" />
-            <Text style={styles.modelStatusText}>{t('common.loading')}</Text>
-          </View>
-        )}
-        {(detectionPlugin.state === 'error' || colorPlugin.state === 'error') && (
-          <View style={styles.modelStatusContainer}>
-            <Text style={[styles.modelStatusText, { color: '#f44336' }]}>
-              ⚠️ {t('vision.noResistorDetected')}
-            </Text>
-          </View>
-        )}
-      </View>
+          {detectedColors && (
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={handleEditColors}
+            >
+              <Text style={styles.editButtonText}>{t('vision.edit')}</Text>
+            </TouchableOpacity>
+          )}
+
+          {(detectionPlugin.state === 'loading' || colorPlugin.state === 'loading') && (
+            <View style={styles.modelStatusContainer}>
+              <ActivityIndicator color="#4CAF50" size="small" />
+              <Text style={styles.modelStatusText}>{t('common.loading')}</Text>
+            </View>
+          )}
+          {(detectionPlugin.state === 'error' || colorPlugin.state === 'error') && (
+            <View style={styles.modelStatusContainer}>
+              <Text style={[styles.modelStatusText, { color: '#f44336' }]}>
+                ⚠️ {t('vision.noResistorDetected')}
+              </Text>
+            </View>
+          )}
+        </View>
+      ) : (
+        <View style={styles.resultsContainer}>
+          {showInstructions && <CameraInstructions step={detectedColors ? 4 : 1} />}
+
+          {detectedColors ? (
+            <>
+              <ResistanceResult value={value} tolerance={tolerance} tempCoeff={tempCoeff} />
+              <ResistorDisplay colors={detectedColors} bandCount={bandCount} />
+            </>
+          ) : (
+            <View style={styles.placeholderContainer}>
+              <Text style={styles.placeholderText}>
+                {t('vision.holdSteady')}
+              </Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[styles.captureButton, isProcessing && styles.captureButtonDisabled]}
+            onPress={handleManualCapture}
+            disabled={isProcessing || !detectionModel || !colorModel}
+          >
+            {isProcessing ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.captureButtonText}>{t('vision.recognizeResistor')}</Text>
+            )}
+          </TouchableOpacity>
+
+          {detectedColors && (
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={handleEditColors}
+            >
+              <Text style={styles.editButtonText}>{t('vision.edit')}</Text>
+            </TouchableOpacity>
+          )}
+
+          {(detectionPlugin.state === 'loading' || colorPlugin.state === 'loading') && (
+            <View style={styles.modelStatusContainer}>
+              <ActivityIndicator color="#4CAF50" size="small" />
+              <Text style={styles.modelStatusText}>{t('common.loading')}</Text>
+            </View>
+          )}
+          {(detectionPlugin.state === 'error' || colorPlugin.state === 'error') && (
+            <View style={styles.modelStatusContainer}>
+              <Text style={[styles.modelStatusText, { color: '#f44336' }]}>
+                ⚠️ {t('vision.noResistorDetected')}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
     </View>
   );
 }

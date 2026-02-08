@@ -2,8 +2,8 @@
   "expo": {
     "name": "Resistor Vision",
     "slug": "resistorvision",
-    "version": "1.0.0",
-    "orientation": "portrait",
+    "version": "1.0.1",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "resistorvision",
     "userInterfaceStyle": "automatic",
@@ -19,11 +19,22 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.chubos.resistorvision",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "infoPlist": {
         "NSCameraUsageDescription": "Resistor Vision needs camera access to recognize resistor band colors.",
         "UIRequiresFullScreen": false,
-        "UIStatusBarHidden": false
+        "UIStatusBarHidden": false,
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ],
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
       }
     },
     "android": {

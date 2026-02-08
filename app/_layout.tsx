@@ -5,6 +5,7 @@ import { Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import * as NavigationBar from "expo-navigation-bar";
+import * as ScreenOrientation from "expo-screen-orientation";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 import "../i18n";
@@ -24,6 +25,14 @@ function TabsLayout() {
     };
     updateNavigationBar();
   }, [colors.surface, isDark]);
+
+  // Enable all screen orientations
+  useEffect(() => {
+    const unlockOrientation = async () => {
+      await ScreenOrientation.unlockAsync();
+    };
+    unlockOrientation();
+  }, []);
 
   return (
     <>
