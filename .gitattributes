@@ -1,0 +1,18 @@
+# Ensure gradlew has execute permissions in Git
+android/gradlew text eol=lf
+ios/Pods/Target\ Support\ Files/Pods-*/*.sh text eol=lf
+
+# Prevent CRLF conversion for shell scripts
+*.sh text eol=lf
+
+# Binary files
+*.jar binary
+*.keystore binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.tflite binary

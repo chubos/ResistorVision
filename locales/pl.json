@@ -1,0 +1,103 @@
+{
+  "common": {
+    "close": "Zamknij",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "confirm": "Potwierdź",
+    "loading": "Ładowanie..."
+  },
+  "tabs": {
+    "home": "Kalkulator",
+    "vision": "Skaner"
+  },
+  "home": {
+    "title": "Kalkulator Rezystorów",
+    "resistance": "Rezystancja",
+    "tolerance": "Tolerancja",
+    "bandCount": "Liczba pasków",
+    "selectBandCount": "Wybierz liczbę pasków",
+    "bands": "paski",
+    "selectColor": "Wybierz kolor dla paska {{number}}",
+    "selectColors": "Wybierz kolory pasków",
+    "band": "Pasek",
+    "instructions": "Wybierz liczbę pasków, a następnie wybierz kolory dla każdego paska, aby obliczyć rezystancję.",
+    "settings": "Ustawienia"
+  },
+  "vision": {
+    "title": "Skanuj Rezystor",
+    "scanning": "Skanowanie...",
+    "recognizeResistor": "Rozpoznaj Rezystor",
+    "processing": "Przetwarzanie...",
+    "noResistorDetected": "Nie wykryto rezystora",
+    "alignResistor": "Wyrównaj rezystor w zielonej ramce",
+    "holdSteady": "Trzymaj stabilnie...",
+    "result": "Wynik",
+    "edit": "Edytuj",
+    "scanAgain": "Skanuj Ponownie",
+    "detectedBands": "Wykryto {{count}} pasków",
+    "needMoreBands": "Wykryto tylko {{count}} pasków (potrzeba min. 3). Zbliż kamerę do rezystora.",
+    "resistorNotDetected": "Nie wykryto rezystora. Upewnij się, że rezystor jest dobrze widoczny w ramce.",
+    "noColorResults": "Brak wyników z modelu kolorów",
+    "noBandsDetected": "Nie wykryto żadnych pasków. Upewnij się, że rezystor jest dobrze widoczny.",
+    "processingError": "Błąd przetwarzania: {{error}}",
+    "detectedBandsWithColors": "Wykryto {{count}} pasków: {{colors}}",
+    "cameraPermission": "Wymagane uprawnienie do kamery",
+    "cameraPermissionMessage": "Proszę włączyć dostęp do kamery w ustawieniach, aby korzystać z tej funkcji.",
+    "cameraPermissionButton": "Przyznaj uprawnienia",
+    "cameraRestricted": "Dostęp do kamery jest ograniczony. Sprawdź ustawienia urządzenia.",
+    "instructions": {
+      "step1": "Umieść rezystor w zielonej ramce",
+      "step2": "Upewnij się, że jest dobre oświetlenie",
+      "step3": "Trzymaj kamerę stabilnie",
+      "step4": "Kliknij przycisk, aby rozpoznać"
+    }
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "theme": "Motyw",
+    "themeLight": "Jasny",
+    "themeDark": "Ciemny",
+    "themeAuto": "Automatyczny",
+    "language": "Język",
+    "privacyPolicy": "Polityka Prywatności i Warunki",
+    "contact": "Skontaktuj się z nami",
+    "version": "Wersja"
+  },
+  "privacy": {
+    "title": "Polityka Prywatności",
+    "intro": "Resistor Vision szanuje prywatność użytkowników swojej aplikacji mobilnej.",
+    "section1Title": "1. Zbieranie Danych",
+    "section1Text": "Resistor Vision nie zbiera, nie przechowuje ani nie przetwarza żadnych danych osobowych użytkowników.",
+    "section2Title": "2. Lokalne Przechowywanie Danych",
+    "section2Text": "Wszelkie dane utworzone w aplikacji (takie jak preferencje motywu lub wykryte wartości rezystorów) są przechowywane lokalnie na urządzeniu użytkownika i nie są przesyłane na zewnętrzne serwery.",
+    "section3Title": "3. Uprawnienia Kamery",
+    "section3Text": "Aplikacja wymaga dostępu do kamery urządzenia wyłącznie w celu rozpoznawania kolorów pasków rezystorów. Zdjęcia są przetwarzane lokalnie na urządzeniu i nie są przesyłane, zapisywane ani udostępniane żadnym stronom trzecim.",
+    "section4Title": "4. Udostępnianie Danych",
+    "section4Text": "Resistor Vision nie sprzedaje, nie wynajmuje ani nie udostępnia żadnych danych użytkowników stronom trzecim.",
+    "section5Title": "5. Usługi Zewnętrzne",
+    "section5Text": "Aplikacja wykorzystuje model uczenia maszynowego (TensorFlow Lite) do rozpoznawania kolorów, który działa całkowicie offline na urządzeniu użytkownika. Nie są używane żadne usługi zewnętrzne, które zbierają dane użytkowników.",
+    "section6Title": "6. Bezpieczeństwo",
+    "section6Text": "Resistor Vision nie przesyła żadnych danych użytkowników przez internet. Wszystkie operacje wykonywane są lokalnie na urządzeniu.",
+    "section7Title": "7. Zmiany w Polityce",
+    "section7Text": "Ta polityka prywatności może zostać zaktualizowana w przypadku zmiany funkcjonalności aplikacji. Wszelkie aktualizacje będą odzwierciedlone w aplikacji.",
+    "section8Title": "8. Kontakt",
+    "section8Text": "Jeśli masz jakiekolwiek pytania dotyczące tej polityki prywatności, skontaktuj się z nami.",
+    "company": "© 2026 Resistor Vision"
+  },
+  "colors": {
+    "black": "Czarny",
+    "brown": "Brązowy",
+    "red": "Czerwony",
+    "orange": "Pomarańczowy",
+    "yellow": "Żółty",
+    "green": "Zielony",
+    "blue": "Niebieski",
+    "purple": "Fioletowy",
+    "gray": "Szary",
+    "white": "Biały",
+    "gold": "Złoty",
+    "silver": "Srebrny"
+  }
+}

@@ -1,4 +1,6 @@
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 interface BandCountSelectorProps {
   bandCount: 3 | 4 | 5 | 6;
@@ -6,9 +8,55 @@ interface BandCountSelectorProps {
 }
 
 export default function BandCountSelector({ bandCount, onBandCountChange }: BandCountSelectorProps) {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+
+  const styles = StyleSheet.create({
+    bandCountContainer: {
+      backgroundColor: colors.cardBackground,
+      padding: 20,
+      borderRadius: 10,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 15,
+      color: colors.text,
+    },
+    bandCountButtons: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+    },
+    bandCountButton: {
+      paddingHorizontal: 30,
+      paddingVertical: 12,
+      borderRadius: 8,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      minWidth: 60,
+      alignItems: "center",
+    },
+    selectedBandCountButton: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    bandCountButtonText: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    selectedBandCountButtonText: {
+      color: "#fff",
+    },
+  });
+
   return (
     <View style={styles.bandCountContainer}>
-      <Text style={styles.sectionTitle}>Liczba pasków:</Text>
+      <Text style={styles.sectionTitle}>{t('home.bandCount')}:</Text>
       <View style={styles.bandCountButtons}>
         {[3, 4, 5, 6].map((count) => (
           <TouchableOpacity
@@ -33,42 +81,3 @@ export default function BandCountSelector({ bandCount, onBandCountChange }: Band
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  bandCountContainer: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#333",
-  },
-  bandCountButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  bandCountButton: {
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
-    minWidth: 60,
-    alignItems: "center",
-  },
-  selectedBandCountButton: {
-    backgroundColor: "#007AFF",
-  },
-  bandCountButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
-  selectedBandCountButtonText: {
-    color: "#fff",
-  },
-});
-

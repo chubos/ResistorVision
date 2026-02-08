@@ -1,4 +1,6 @@
 import { Text, View, StyleSheet } from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 interface ResistanceResultProps {
   value: number;
@@ -7,18 +9,22 @@ interface ResistanceResultProps {
 }
 
 export default function ResistanceResult({ value, tolerance, tempCoeff }: ResistanceResultProps) {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
   const formatResistance = () => {
     let unit = "Ω";
-    let displayValue = value;
 
-    if (value >= 1000000000) {
-      displayValue = value / 1000000000;
+    // Round to 10 decimal places to avoid floating-point issues before converting units
+    let displayValue = Math.round(value * 10000000000) / 10000000000;
+
+    if (displayValue >= 1000000000) {
+      displayValue = displayValue / 1000000000;
       unit = "GΩ";
-    } else if (value >= 1000000) {
-      displayValue = value / 1000000;
+    } else if (displayValue >= 1000000) {
+      displayValue = displayValue / 1000000;
       unit = "MΩ";
-    } else if (value >= 1000) {
-      displayValue = value / 1000;
+    } else if (displayValue >= 1000) {
+      displayValue = displayValue / 1000;
       unit = "kΩ";
     }
 
@@ -35,9 +41,34 @@ export default function ResistanceResult({ value, tolerance, tempCoeff }: Resist
 
   const hasTempCoeff = tempCoeff !== null && tempCoeff !== undefined;
 
+  const styles = StyleSheet.create({
+    resultContainer: {
+      backgroundColor: colors.cardBackground,
+      padding: 20,
+      borderRadius: 10,
+      alignItems: "center",
+      marginBottom: 30,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    resultLabel: {
+      fontSize: 18,
+      color: colors.textSecondary,
+      marginBottom: 5,
+    },
+    resultValue: {
+      fontSize: 36,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    resultValueSmall: {
+      fontSize: 28,
+    },
+  });
+
   return (
     <View style={styles.resultContainer}>
-      <Text style={styles.resultLabel}>Rezystancja:</Text>
+      <Text style={styles.resultLabel}>{t('home.resistance')}:</Text>
       <Text style={[
         styles.resultValue,
         hasTempCoeff && styles.resultValueSmall
@@ -47,27 +78,3 @@ export default function ResistanceResult({ value, tolerance, tempCoeff }: Resist
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  resultContainer: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  resultLabel: {
-    fontSize: 18,
-    color: "#666",
-    marginBottom: 5,
-  },
-  resultValue: {
-    fontSize: 36,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  resultValueSmall: {
-    fontSize: 28,
-  },
-});
-
