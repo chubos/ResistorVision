@@ -2,7 +2,7 @@
   "expo": {
     "name": "Resistor Vision",
     "slug": "resistorvision",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "resistorvision",
@@ -54,7 +54,7 @@
         "enableForceDarkMode": false
       },
       "package": "com.chubos.resistorvision",
-      "versionCode": 2,
+      "versionCode": 3,
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
