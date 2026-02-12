@@ -50,7 +50,7 @@ export default function ResistanceResult({ value, tolerance, tempCoeff }: Resist
       padding: isLandscape ? 15 : 20,
       borderRadius: 10,
       alignItems: "center",
-      marginBottom: isLandscape ? 10 : 30,
+      marginBottom: isLandscape ? 10 : 25,
       borderWidth: 1,
       borderColor: colors.border,
     },

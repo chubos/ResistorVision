@@ -33,7 +33,7 @@ export default function ResistorDisplay({ colors, bandCount }: ResistorDisplayPr
       backgroundColor: themeColors.cardBackground,
       padding: isLandscape ? 15 : 30,
       borderRadius: 10,
-      marginBottom: isLandscape ? 0 : 30,
+      marginBottom: isLandscape ? 0 : 25,
       alignItems: "center",
       borderWidth: 1,
       borderColor: themeColors.border,

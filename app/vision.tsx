@@ -273,7 +273,8 @@ export default function Vision() {
     },
     cameraContainer: {
       width: isLandscape ? '50%' : undefined,
-      flex: isLandscape ? undefined : 1,
+      height: isLandscape ? undefined : height * 0.35,
+      flex: isLandscape ? undefined : undefined,
       position: "relative",
       overflow: "hidden",
     },
@@ -313,14 +314,14 @@ export default function Vision() {
     },
     resultsContainer: {
       width: isLandscape ? '50%' : undefined,
-      flex: isLandscape ? undefined : undefined,
+      flex: 1,
       backgroundColor: colors.surface,
       padding: 20,
-      paddingTop: isLandscape ? 15 : 30,
+      paddingTop: isLandscape ? 15 : 25,
       paddingLeft: isLandscape ? Math.max(20, insets.left) : 20,
-      paddingRight: isLandscape ? Math.max(20, insets.right) : 20,
-      paddingBottom: isLandscape ? Math.max(80, insets.bottom + 80) : 20,
-      justifyContent: isLandscape ? 'space-between' : undefined,
+      paddingRight: isLandscape ? Math.max(80, insets.right + 20) : 20,
+      paddingBottom: isLandscape ? Math.max(80, insets.bottom + 80) : Math.max(20, insets.bottom + 20),
+      justifyContent: isLandscape ? 'space-between' : 'flex-end',
     },
     placeholderContainer: {
       backgroundColor: colors.cardBackground,
@@ -341,7 +342,7 @@ export default function Vision() {
       paddingVertical: isLandscape ? 12 : 16,
       borderRadius: 10,
       alignItems: "center",
-      marginTop: isLandscape ? 10 : 10,
+      marginTop: isLandscape ? 10 : 20,
     },
     captureButtonDisabled: {
       backgroundColor: colors.textSecondary,
@@ -356,7 +357,7 @@ export default function Vision() {
       paddingVertical: isLandscape ? 10 : 14,
       borderRadius: 10,
       alignItems: "center",
-      marginTop: isLandscape ? 10 : 12,
+      marginTop: isLandscape ? 10 : 15,
     },
     editButtonText: {
       color: "#fff",
@@ -367,7 +368,7 @@ export default function Vision() {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      marginTop: isLandscape ? 10 : 12,
+      marginTop: isLandscape ? 10 : 15,
       padding: isLandscape ? 6 : 8,
     },
     modelStatusText: {
