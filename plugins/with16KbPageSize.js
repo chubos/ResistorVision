@@ -9,6 +9,7 @@ const fs = require('fs');
 
 /**
  * Adds target_link_options with 16 KB page size flags to a CMakeLists.txt file.
+ * Also sets CMAKE_SHARED_LINKER_FLAGS so subdirectories (like libyuv) inherit the flags.
  * Only adds if not already present to be idempotent.
  */
 function patch16KbFlags(cmakePath, targetName) {
@@ -24,6 +25,14 @@ function patch16KbFlags(cmakePath, targetName) {
     return;
   }
 
+  // Set CMAKE_SHARED_LINKER_FLAGS early so subdirectories (libyuv) inherit it,
+  // then also add target_link_options for this specific target.
+  const patch = `
+# 16 KB page size support for Android 15+ - applies to all shared libs incl. subdirs
+string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384")
+
+`;
+
   const linkOptions = `
 target_link_options(${targetName}
     PRIVATE
@@ -32,10 +41,56 @@ target_link_options(${targetName}
 )
 `;
 
-  // Append before the last line or at the end
+  // Insert CMAKE_SHARED_LINKER_FLAGS at top (after cmake_minimum_required if present, else at top)
+  if (/cmake_minimum_required/i.test(content)) {
+    content = content.replace(
+      /(cmake_minimum_required[^\n]*\n)/i,
+      `$1${patch}`
+    );
+  } else {
+    content = patch + content;
+  }
+
+  // Append target_link_options at end
   content = content.trimEnd() + '\n' + linkOptions;
   fs.writeFileSync(cmakePath, content, 'utf8');
   console.log(`[with16KbPageSize] Patched 16 KB flags into: ${cmakePath}`);
+}
+
+/**
+ * Patches libyuv CMakeLists.txt using CMAKE_SHARED_LINKER_FLAGS.
+ * libyuv uses CMake 2.8.12 which doesn't support target_link_options,
+ * so we use CMAKE_SHARED_LINKER_FLAGS which works with old CMake.
+ * The shared target name is stored in variable ${ly_lib_shared}.
+ */
+function patchLibyuv16KbFlags(cmakePath) {
+  if (!fs.existsSync(cmakePath)) {
+    console.warn(`[with16KbPageSize] libyuv CMakeLists.txt not found at: ${cmakePath}`);
+    return;
+  }
+
+  let content = fs.readFileSync(cmakePath, 'utf8');
+
+  if (content.includes('max-page-size=16384')) {
+    console.log(`[with16KbPageSize] libyuv already patched: ${cmakePath}`);
+    return;
+  }
+
+  // Use CMAKE_SHARED_LINKER_FLAGS - works with CMake 2.8.12+
+  // Also add SET_TARGET_PROPERTIES as fallback for the shared target
+  const patch = `
+# 16 KB page size support for Android 15+
+string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384")
+`;
+
+  // Insert right after cmake_minimum_required line
+  content = content.replace(
+    /(CMAKE_MINIMUM_REQUIRED[^\n]*\n)/i,
+    `$1${patch}`
+  );
+
+  fs.writeFileSync(cmakePath, content, 'utf8');
+  console.log(`[with16KbPageSize] Patched libyuv 16 KB flags into: ${cmakePath}`);
 }
 
 /**
@@ -56,16 +111,16 @@ const withResizePlugin16Kb = (config) => {
       );
       patch16KbFlags(resizePluginCMake, 'VisionCameraResizePlugin');
 
-      // libyuv (bundled inside vision-camera-resize-plugin)
-      // yuv_shared is the target that creates libyuv.so
+      // libyuv (bundled inside vision-camera-resize-plugin at root level, not android/libyuv)
+      // Uses CMAKE_SHARED_LINKER_FLAGS because libyuv requires CMake 2.8.12
+      // which doesn't support target_link_options
       const libyuvCMake = path.join(
         nodeModulesDir,
         'vision-camera-resize-plugin',
-        'android',
         'libyuv',
         'CMakeLists.txt'
       );
-      patch16KbFlags(libyuvCMake, 'yuv_shared');
+      patchLibyuv16KbFlags(libyuvCMake);
 
       return config;
     },
