@@ -2,7 +2,7 @@
   "expo": {
     "name": "Resistor Vision",
     "slug": "resistorvision",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "resistorvision",
@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.chubos.resistorvision",
-      "buildNumber": "2",
+      "buildNumber": "4",
       "infoPlist": {
         "NSCameraUsageDescription": "Resistor Vision needs camera access to recognize resistor band colors.",
         "UIRequiresFullScreen": false,
@@ -54,7 +54,7 @@
         "enableForceDarkMode": false
       },
       "package": "com.chubos.resistorvision",
-      "versionCode": 3,
+      "versionCode": 4,
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
@@ -64,6 +64,8 @@
     },
     "plugins": [
       "expo-router",
+      "./plugins/with16KbPageSize",
+      "react-native-fast-tflite",
       [
         "expo-splash-screen",
         {
