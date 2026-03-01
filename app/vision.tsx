@@ -34,6 +34,70 @@ const RESISTOR_COLORS = {
   silver: { value: null, multiplier: 0.01, tolerance: 10, tempCoeff: null, color: "#C0C0C0" },
 };
 
+/**
+ * Automatic white balance using Gray World Assumption.
+ * Scales each R/G/B channel so that channel averages are equal.
+ * This reduces colour cast from warm/cold lighting that can confuse
+ * the model when distinguishing brown vs red bands.
+ */
+function applyWhiteBalance(floatData: Float32Array): Float32Array {
+  const numPixels = 640 * 640;
+  let sumR = 0, sumG = 0, sumB = 0;
+
+  for (let i = 0; i < numPixels; i++) {
+    sumR += floatData[i * 3];
+    sumG += floatData[i * 3 + 1];
+    sumB += floatData[i * 3 + 2];
+  }
+
+  const avgR = sumR / numPixels;
+  const avgG = sumG / numPixels;
+  const avgB = sumB / numPixels;
+
+  const avgGray = (avgR + avgG + avgB) / 3;
+  const clampScale = (s: number) => Math.min(Math.max(s, 0.5), 2.0);
+  const sR = avgR > 0.01 ? clampScale(avgGray / avgR) : 1;
+  const sG = avgG > 0.01 ? clampScale(avgGray / avgG) : 1;
+  const sB = avgB > 0.01 ? clampScale(avgGray / avgB) : 1;
+
+  const result = new Float32Array(numPixels * 3);
+  for (let i = 0; i < numPixels; i++) {
+    result[i * 3]     = Math.min(floatData[i * 3]     * sR, 1);
+    result[i * 3 + 1] = Math.min(floatData[i * 3 + 1] * sG, 1);
+    result[i * 3 + 2] = Math.min(floatData[i * 3 + 2] * sB, 1);
+  }
+  return result;
+}
+
+/** Decode JPEG base64 to Float32Array RGB (640x640x3) with white balance */
+function decodeJpegToFloat32(base64: string): Float32Array {
+  const binaryString = atob(base64);
+  const jpegData = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    jpegData[i] = binaryString.charCodeAt(i);
+  }
+
+  const rawImageData = jpeg.decode(jpegData, { useTArray: true });
+  const { width, height, data } = rawImageData;
+
+  const floatData = new Float32Array(640 * 640 * 3);
+
+  for (let y = 0; y < 640; y++) {
+    for (let x = 0; x < 640; x++) {
+      const srcX = Math.floor(x * width / 640);
+      const srcY = Math.floor(y * height / 640);
+      const srcIdx = (srcY * width + srcX) * 4;
+      const dstIdx = (y * 640 + x) * 3;
+
+      floatData[dstIdx]     = (data[srcIdx]     || 0) / 255;
+      floatData[dstIdx + 1] = (data[srcIdx + 1] || 0) / 255;
+      floatData[dstIdx + 2] = (data[srcIdx + 2] || 0) / 255;
+    }
+  }
+
+  return applyWhiteBalance(floatData);
+}
+
 export default function Vision() {
   useKeepAwake();
 
@@ -74,7 +138,7 @@ export default function Vision() {
     if (!hasPermission) {
       requestPermission();
     }
-  }, [hasPermission]);
+  }, [hasPermission, requestPermission]);
 
   useEffect(() => {
     const checkInstructionsShown = async () => {
@@ -83,7 +147,7 @@ export default function Vision() {
         if (shown === 'true') {
           setShowInstructions(false);
         }
-      } catch (error) {
+      } catch {
 
       }
     };
@@ -104,7 +168,7 @@ export default function Vision() {
       return;
     }
     Alert.alert(t('vision.cameraError'), error?.message || '');
-  }, []);
+  }, [t]);
 
   // ML detection
   const handleManualCapture = useCallback(async () => {
@@ -123,7 +187,7 @@ export default function Vision() {
     try {
       await AsyncStorage.setItem('visionInstructionsShown', 'true');
       setShowInstructions(false);
-    } catch (error) {
+    } catch {
 
     }
 
@@ -152,7 +216,8 @@ export default function Vision() {
       );
 
       if (!manipulatedImage.base64) {
-        throw new Error('Cannot process captured image');
+        Alert.alert(t('vision.noResistorDetected'), t('vision.cameraPermissionMessage'));
+        return;
       }
 
       const imageData = decodeJpegToFloat32(manipulatedImage.base64);
@@ -164,41 +229,13 @@ export default function Vision() {
       } else {
         Alert.alert(t('vision.noResistorDetected'), result.message || t('vision.needMoreBands', { count: result.colors?.length || 0 }));
       }
-    } catch (error: any) {
+    } catch {
       Alert.alert(t('vision.noResistorDetected'), t('vision.cameraPermissionMessage'));
     } finally {
       setIsProcessing(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detectionModel, colorModel, t]);
-
-  // Decode JPEG base64 to Float32Array RGB (640x640x3)
-  const decodeJpegToFloat32 = (base64: string): Float32Array => {
-    const binaryString = atob(base64);
-    const jpegData = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      jpegData[i] = binaryString.charCodeAt(i);
-    }
-
-    const rawImageData = jpeg.decode(jpegData, { useTArray: true });
-    const { width, height, data } = rawImageData;
-
-    const floatData = new Float32Array(640 * 640 * 3);
-
-    for (let y = 0; y < 640; y++) {
-      for (let x = 0; x < 640; x++) {
-        const srcX = Math.floor(x * width / 640);
-        const srcY = Math.floor(y * height / 640);
-        const srcIdx = (srcY * width + srcX) * 4;
-        const dstIdx = (y * 640 + x) * 3;
-
-        floatData[dstIdx] = (data[srcIdx] || 0) / 255;
-        floatData[dstIdx + 1] = (data[srcIdx + 1] || 0) / 255;
-        floatData[dstIdx + 2] = (data[srcIdx + 2] || 0) / 255;
-      }
-    }
-
-    return floatData;
-  };
 
   const calculateResistance = () => {
     if (!detectedColors || detectedColors.length < 3) {
@@ -250,7 +287,7 @@ export default function Vision() {
       await AsyncStorage.setItem('detectedColors', JSON.stringify(detectedColors));
       await AsyncStorage.setItem('bandCount', String(bandCount));
       router.push('/');
-    } catch (error) {
+    } catch {
       Alert.alert(t('vision.noResistorDetected'), t('vision.cameraPermissionMessage'));
     }
   }, [detectedColors, bandCount, router, t]);
